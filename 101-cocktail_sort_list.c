@@ -1,74 +1,97 @@
 #include "sort.h"
 
-void swap_tail(listint_t **list, listint_t **head, listint_t **tail)
-{
-	listint_t *temp = (*tail)->next;
+void swap_node_ahead(listint_t **list, listint_t **tail, listint_t **shaker);
+void swap_node_behind(listint_t **list, listint_t **tail, listint_t **shaker);
+void cocktail_sort_list(listint_t **list);
 
-	if ((*tail)->prev != NULL)
-	{
-		(*tail)->prev->next = temp;
-	}
-	else
-		*list = temp;
-	temp->prev = (*tail)->prev;
-	(*tail)->next = temp->next;
-	if (temp->next !=NULL)
-	{
-		temp->next->prev = *tail;
-	}
-	else
-		*head = *tail;
-	(*tail)->prev = temp;
-	temp->next = *tail;
-	*tail = temp;
-}
-void swap_head(listint_t **list, listint_t **tail, listint_t **head)
+/**
+ * swap_node_ahead - Swap a node in a listint_t doubly-linked list
+ *                   list of integers with the node ahead of it.
+ * @list: A pointer to the head of a doubly-linked list of integers.
+ * @tail: A pointer to the tail of the doubly-linked list.
+ * @shaker: A pointer to the current swapping node of the cocktail shaker algo.
+ */
+void swap_node_ahead(listint_t **list, listint_t **tail, listint_t **shaker)
 {
-	listint_t *temp = (*head)->next;
+	listint_t *tmp = (*shaker)->next;
 
-	if ((*head)->next != NULL)
-		(*head)->next->prev = temp;
+	if ((*shaker)->prev != NULL)
+		(*shaker)->prev->next = tmp;
 	else
-		*tail = temp;
-	temp->next = (*tail)->next;
-	(*head)->prev = temp->prev;
-	if (temp->prev !=NULL)
-	{
-		temp->prev->next = *head;
-	}
+		*list = tmp;
+	tmp->prev = (*shaker)->prev;
+	(*shaker)->next = tmp->next;
+	if (tmp->next != NULL)
+		tmp->next->prev = *shaker;
 	else
-		*list = *head;
-	(*head)->next = temp;
-	temp->prev = *head;
-	*head = temp;
+		*tail = *shaker;
+	(*shaker)->prev = tmp;
+	tmp->next = *shaker;
+	*shaker = tmp;
 }
+
+/**
+ * swap_node_behind - Swap a node in a listint_t doubly-linked
+ *                    list of integers with the node behind it.
+ * @list: A pointer to the head of a doubly-linked list of integers.
+ * @tail: A pointer to the tail of the doubly-linked list.
+ * @shaker: A pointer to the current swapping node of the cocktail shaker algo.
+ */
+void swap_node_behind(listint_t **list, listint_t **tail, listint_t **shaker)
+{
+	listint_t *tmp = (*shaker)->prev;
+
+	if ((*shaker)->next != NULL)
+		(*shaker)->next->prev = tmp;
+	else
+		*tail = tmp;
+	tmp->next = (*shaker)->next;
+	(*shaker)->prev = tmp->prev;
+	if (tmp->prev != NULL)
+		tmp->prev->next = *shaker;
+	else
+		*list = *shaker;
+	(*shaker)->next = tmp;
+	tmp->prev = *shaker;
+	*shaker = tmp;
+}
+
+/**
+ * cocktail_sort_list - Sort a listint_t doubly-linked list of integers in
+ *                      ascending order using the cocktail shaker algorithm.
+ * @list: A pointer to the head of a listint_t doubly-linked list.
+ */
 void cocktail_sort_list(listint_t **list)
 {
-	bool booln = false;
-	listint_t *head;
-	listint_t *tail;
+	listint_t *tail, *shaker;
+	bool shaken_not_stirred = false;
+
+	if (list == NULL || *list == NULL || (*list)->next == NULL)
+		return;
 
 	for (tail = *list; tail->next != NULL;)
 		tail = tail->next;
-	
-	for (;booln == false; booln = true)
+
+	while (shaken_not_stirred == false)
 	{
-		for (head = *list; head != tail; head = head->next)
+		shaken_not_stirred = true;
+		for (shaker = *list; shaker != tail; shaker = shaker->next)
 		{
-			if (head->n > head->next->n)
+			if (shaker->n > shaker->next->n)
 			{
-				swap_tail(list, &tail, &head);
-				print_list((const listint_t *) *list);
-				booln = false;
+				swap_node_ahead(list, &tail, &shaker);
+				print_list((const listint_t *)*list);
+				shaken_not_stirred = false;
 			}
 		}
-		for (head = head->prev; head != *list; head = head->prev)
+		for (shaker = shaker->prev; shaker != *list;
+				shaker = shaker->prev)
 		{
-			if (head->n < head->prev->n)
+			if (shaker->n < shaker->prev->n)
 			{
-				swap_head(list, &tail, &head);
-				print_list((const listint_t *) *list);
-				booln = false;
+				swap_node_behind(list, &tail, &shaker);
+				print_list((const listint_t *)*list);
+				shaken_not_stirred = false;
 			}
 		}
 	}
